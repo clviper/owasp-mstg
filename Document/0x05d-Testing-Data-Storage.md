@@ -6,6 +6,8 @@ The guidelines for saving data can be summarized quite easily: Public data shoul
 
 Note that the meaning of "sensitive data" depends on the app that handles it. Data classification is described in detail in the "Identifying Sensitive Data" section of the chapter "Mobile App Security Testing."
 
+Next to protecting sensitive data, you need to ensure that data read from any storage source is validated and possibly sanitized. The validation often does not go beyond ensuring that the data presented is of the type requested, but with using additional cryptographic controls, such as an HMAC, you can validate the correctness of the data.
+
 ### Testing Local Storage for Sensitive Data
 
 #### Overview
@@ -24,7 +26,7 @@ Disclosing sensitive information has several consequences, including decrypted i
 - Internal Storage
 - External Storage
 
-The following code snippets demonstrate bad practices that disclose sensitive information. They also illustrate Android storage mechanisms in detail. For more information, check out the [Security Tips for Storing Data](http://developer.android.com/training/articles/security-tips.html#StoringData "Security Tips for Storing Data") in the Android developer's guide.
+The following code snippets demonstrate bad practices that disclose sensitive information. They also illustrate Android storage mechanisms in detail. For more information, check out the [Security Tips for Storing Data](https://developer.android.com/training/articles/security-tips.html#StoringData "Security Tips for Storing Data") in the Android developer's guide.
 
 ##### Shared Preferences
 The SharedPreferences API is commonly used to permanently save small collections of key-value pairs. Data stored in a SharedPreferences object is written to a plain-text XML file. The SharedPreferences object can be declared world-readable (accessible to all apps) or private.
@@ -52,13 +54,12 @@ Once the activity has been called, the file key.xml will be created with the pro
 
 - `MODE_WORLD_READABLE` allows all applications to access and read the contents of `key.xml`.
 
-```bash
+```shell
 root@hermes:/data/data/sg.vp.owasp_mobile.myfirstapp/shared_prefs # ls -la
 -rw-rw-r-- u0_a118    170 2016-04-23 16:51 key.xml
 ```
 
 > Please note that `MODE_WORLD_READABLE` and `MODE_WORLD_WRITEABLE` were deprecated with API 17. Although newer devices may not be affected by this, applications compiled with an android:targetSdkVersion value less than 17 may be affected if they run on an OS version that was released before Android 4.2 (`JELLY_BEAN_MR1`).
-
 
 ##### SQLite Database (Unencrypted)
 
@@ -117,7 +118,7 @@ If the database is not encrypted, you should be able to obtain the data. If the 
 
 ##### Internal Storage
 
-You can save files to the device's [internal storage](http://developer.android.com/guide/topics/data/data-storage.html#filesInternal "Using Internal Storage"). Files saved to internal storage are containerized by default and cannot be accessed by other apps on the device. When the user uninstalls your app, these files are removed.
+You can save files to the device's [internal storage](https://developer.android.com/guide/topics/data/data-storage.html#filesInternal "Using Internal Storage"). Files saved to internal storage are containerized by default and cannot be accessed by other apps on the device. When the user uninstalls your app, these files are removed.
 The following code would persistently store sensitive data to internal storage:
 
 ```java
@@ -132,9 +133,10 @@ try {
    e.printStackTrace();
 }
 ```
-You should check the file mode to make sure that only the app can access the file. You can set this access with `MODE_PRIVATE`. Modes such as `MODE_WORLD_READABLE` (deprecated) and `MODE_WORLD_WRITEABLE` (deprecated) are laxer and may pose a security risk.
+You should check the file mode to make sure that only the app can access the file. You can set this access with `MODE_PRIVATE`. Modes such as `MODE_WORLD_READABLE` (deprecated) and `MODE_WORLD_WRITEABLE` (deprecated) may pose a security risk.
 
 Search for the class `FileInputStream` to find out which files are opened and read within the app.
+
 
 ##### External Storage
 
@@ -154,6 +156,7 @@ FileOutputStream fos;
 The file will be created and the data will be stored in a clear text file in external storage once the activity has been called.
 
 It's also worth knowing that files stored outside the application folder (`data/data/<package-name>/`) will not be deleted when the user uninstalls the application.
+Last, it's worth noting that the extneral storage can be used by an attacker to allow for arbitrary control of the application in some cases. For more information: [see the blog from Checkpoint](https://blog.checkpoint.com/2018/08/12/man-in-the-disk-a-new-attack-surface-for-android-apps/ "Man in the disk").
 
 #### Static Analysis
 
@@ -240,13 +243,13 @@ buildTypes {
 
 ##### KeyStore
 
-The [Android KeyStore](http://www.androidauthority.com/use-android-keystore-store-passwords-sensitive-information-623779/ "Use Android KeyStore") supports relatively secure credential storage. As of Android 4.3, it provides public APIs for storing and using app-private keys. An app can use a public key to create a new private/public key pair for encrypting application secrets, and it can decrypt the secrets with the private key.
+The [Android KeyStore](https://www.androidauthority.com/use-android-keystore-store-passwords-sensitive-information-623779/ "Use Android KeyStore") supports relatively secure credential storage. As of Android 4.3, it provides public APIs for storing and using app-private keys. An app can use a public key to create a new private/public key pair for encrypting application secrets, and it can decrypt the secrets with the private key.
 
 You can protect keys stored in the Android KeyStore with user authentication in a confirm credential flow. The user's lock screen credentials (pattern, PIN, password, or fingerprint) are used for authentication.
 
 You can use stored keys in one of two modes:
 
-1. Users are authorized to use keys for a limited period of time after authentication. In this mode, all keys can be used as soon as the user unlocks the device. You can customize the period of authorization for each key. You can use this option only if the secure lock screen is enabled. If the user disables the secure lock screen, all stored keys will become permanently invalid. 
+1. Users are authorized to use keys for a limited period of time after authentication. In this mode, all keys can be used as soon as the user unlocks the device. You can customize the period of authorization for each key. You can use this option only if the secure lock screen is enabled. If the user disables the secure lock screen, all stored keys will become permanently invalid.
 
 2. Users are authorized to use a specific cryptographic operation that is associated with one key. In this mode, users must request a separate authorization for each operation that involves the key. Currently, fingerprint authentication is the only way to request such authorization.
 
@@ -263,7 +266,7 @@ Be aware that not all KeyStores properly protect the keys stored in the KeyStore
 
 ##### KeyChain
 
-The [KeyChain class](http://developer.android.com/reference/android/security/KeyChain.html "Android KeyChain") is used to store and retrieve *system-wide* private keys and their corresponding certificates (chain). The user will be prompted to set a lock screen pin or password to protect the credential storage if something is being imported into the KeyChain for the first time. Note that the KeyChain is system-wide—every application can access the materials stored in the KeyChain.
+The [KeyChain class](https://developer.android.com/reference/android/security/KeyChain.html "Android KeyChain") is used to store and retrieve *system-wide* private keys and their corresponding certificates (chain). The user will be prompted to set a lock screen pin or password to protect the credential storage if something is being imported into the KeyChain for the first time. Note that the KeyChain is system-wide—every application can access the materials stored in the KeyChain.
 
 Inspect the source code to determine whether native Android mechanisms identify sensitive information. Sensitive information should be encrypted, not stored in clear text. For sensitive information that must be stored on the device, several API calls are available to protect the data via the `KeyChain` class. Complete the following steps:
 
@@ -282,6 +285,22 @@ Install and use the app, executing all functions at least once. Data can be gene
 - Check external storage for data. Don't use external storage for sensitive data because it is readable and writeable system-wide.
 
 Files saved to internal storage are by default private to your application; neither the user nor other applications can access them. When users uninstall your application, these files are removed.
+
+### Testing Local Storage for Input Validation
+For any publicly accessible data storage, any process can override the data. This means that input validation needs to be applied the moment the data is read back again.
+> Note: Similar holds for private accessible data on a rooted device
+
+#### Static analysis
+
+##### Using Shared Preferences
+When you use the `SharedPreferences.Editor` to read/write int/boolean/long values, you cannot check whether the data is overridden or not. However: it can hardly be used for actual attacks other than chaning the values (E.g.: no additional exploits can be packed which will take over the control flow). In the case of a `String` or a `StringSet`  one should be careful with how the data is interpreted.
+Using reflection based persistence? Check the section on "Testing Object Persistence" for Android to see how it should be validated.
+Using the `SharedPreferences.Editor` to store and read certificates or keys? Make sure you have patched your security provider given vulnerabilities such as found in [Bouncy Castle](https://www.cvedetails.com/cve/CVE-2018-1000613/ "Key reading vulnerability due to unsafe reflection").
+
+In all cases, having the content HMACed can help to ensure that no additions and/or changes have been applied.
+
+##### Using Other Storage Mechanisms
+In case other public storage mechanisms (than the `SharedPreferences.Editor`) are used, the data needs to be validated the moment it is read from the storage mechanism.
 
 
 ### Testing Logs for Sensitive Data
@@ -374,7 +393,7 @@ afterEvaluate {
 
 Use all the mobile app functions at least once, then identify the application's data directory and look for log files (`/data/data/<package-name>`). Check the application logs to determine whether log data has been generated; some mobile applications create and store their own logs in the data directory.  
 
-Many application developers still use `System.out.println` or `printStackTrace` instead of a proper logging class. Therefore, your testing strategy must include all output generated while the application is starting, running and closing. To determine what data is directly printed by `System.out.println` or `printStackTrace`, you can use [`Logcat`](http://developer.android.com/tools/debugging/debugging-log.html "Debugging with Logcat"). There are two ways to execute Logcat:
+Many application developers still use `System.out.println` or `printStackTrace` instead of a proper logging class. Therefore, your testing strategy must include all output generated while the application is starting, running and closing. To determine what data is directly printed by `System.out.println` or `printStackTrace`, you can use [`Logcat`](https://developer.android.com/tools/debugging/debugging-log.html "Debugging with Logcat"). There are two ways to execute Logcat:
 
 - Logcat is part of _Dalvik Debug Monitor Server_ (DDMS) and Android Studio. If the app is running in debug mode, the log output will be shown in the Android Monitor on the Logcat tab. You can filter the app's log output by defining patterns in Logcat.
 
@@ -382,13 +401,13 @@ Many application developers still use `System.out.println` or `printStackTrace` 
 
 - You can execute Logcat with adb to store the log output permanently:
 
-```bash
+```shell
 $ adb logcat > logcat.log
 ```
 
-With the following command you can specifically grep for the log output of the app in scope, just insert the package name. 
+With the following command you can specifically grep for the log output of the app in scope, just insert the package name.
 
-```bash
+```shell
 $ adb logcat | grep "$(adb shell ps | grep <package-name> | awk '{print $2}')"
 ```
 
@@ -656,7 +675,7 @@ Vulnerable Providers:
 
 Note that `adb` can also be used to query content providers:
 
-```bash
+```shell
 $ adb shell content query --uri content://com.owaspomtg.vulnapp.provider.CredentialProvider/credentials
 Row: 0 id=1, username=admin, password=StrongPwd
 Row: 1 id=2, username=test, password=test
@@ -761,32 +780,41 @@ To check for key/value backup implementations, look for these classes in the sou
 
 After executing all available app functions, attempt to back up via `adb`. If the backup is successful, inspect the backup archive for sensitive data. Open a terminal and run the following command:
 
-```bash
+```shell
 $ adb backup -apk -nosystem <package-name>
 ```
 
 Approve the backup from your device by selecting the _Back up my data_ option. After the backup process is finished, the file _.ab_ will be in your working directory.
 Run the following command to convert the .ab file to tar.
 
-```bash
+```shell
 $ dd if=mybackup.ab bs=24 skip=1|openssl zlib -d > mybackup.tar
 ```
 
 In case you get the error `openssl:Error: 'zlib' is an invalid command.` you can try to use Python instead.
 
-```bash
+```shell
 dd if=backup.ab bs=1 skip=24 | python -c "import zlib,sys;sys.stdout.write(zlib.decompress(sys.stdin.read()))" > backup.tar
 ```
 
-The [_Android Backup Extractor_](https://github.com/nelenkov/android-backup-extractor "Android Backup Extractor") is another alternative backup tool. To make the tool to work, you have to download the Oracle JCE Unlimited Strength Jurisdiction Policy Files for [JRE7](http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html "Oracle JCE Unlimited Strength Jurisdiction Policy Files JRE7") or [JRE8](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html "Oracle JCE Unlimited Strength Jurisdiction Policy Files JRE8") and place them in the JRE lib/security folder. Run the following command to convert the tar file:
+The [_Android Backup Extractor_](https://github.com/nelenkov/android-backup-extractor "Android Backup Extractor") is another alternative backup tool. To make the tool to work, you have to download the Oracle JCE Unlimited Strength Jurisdiction Policy Files for [JRE7](https://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html "Oracle JCE Unlimited Strength Jurisdiction Policy Files JRE7") or [JRE8](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html "Oracle JCE Unlimited Strength Jurisdiction Policy Files JRE8") and place them in the JRE lib/security folder. Run the following command to convert the tar file:
 
-```bash
-java -jar android-backup-extractor-20160710-bin/abe.jar unpack backup.ab
+```shell
+java -jar abe.jar unpack backup.ab
 ```
+if it shows some Cipher information and usage, which means it hasn't unpacked successfully. In this case you can give a try with more arguments:
 
+```shell
+abe [-debug] [-useenv=yourenv] unpack <backup.ab> <backup.tar> [password]
+```
+[password]: is the password when your android device asked you earlier. For example here is: 123
+
+```shell
+java -jar abe.jar unpack backup.ab backup.tar 123
+```
 Extract the tar file to your working directory.
 
-```bash
+```shell
 $ tar xvf mybackup.tar
 ```
 
@@ -1019,7 +1047,7 @@ For more advanced analysis of the memory dump, use the Eclipse Memory Analyzer (
 
 To analyze the dump in MAT, use the _hprof-conv_ platform tool, which comes with the Android SDK.
 
-```bash
+```shell
 ./hprof-conv memory.hprof memory-mat.hprof
 ```
 
@@ -1100,7 +1128,6 @@ The dynamic analysis depends on the checks enforced by the app and their expecte
 
 - M1 - Improper Platform Usage - https://www.owasp.org/index.php/Mobile_Top_10_2016-M1-Improper_Platform_Usage
 - M2 - Insecure Data Storage - https://www.owasp.org/index.php/Mobile_Top_10_2016-M2-Insecure_Data_Storage
-- M4 - Unintended Data Leakage
 
 #### OWASP MASVS
 
@@ -1115,16 +1142,18 @@ The dynamic analysis depends on the checks enforced by the app and their expecte
 - V2.9: "The app removes sensitive data from views when backgrounded."
 - V2.10: "The app does not hold sensitive data in memory longer than necessary, and memory is cleared explicitly after use."
 - V2.11: "The app enforces a minimum device-access-security policy, such as requiring the user to set a device passcode."
+- V6.1: "The app only requests the minimum set of permissions necessary."
+- V6.2: "All inputs from external sources and the user are validated and if necessary sanitized. This includes data received via the UI, IPC mechanisms such as intents, custom URLs, and network sources."
 
 #### CWE
 
-- CWE-117: Improper Output Neutralization for Logs
+- CWE-117 - Improper Output Neutralization for Logs
 - CWE-200 - Information Exposure
 - CWE-316 - Cleartext Storage of Sensitive Information in Memory
 - CWE-359 - Exposure of Private Information ('Privacy Violation')
 - CWE-524 - Information Exposure Through Caching
-- CWE-532: Information Exposure Through Log Files
-- CWE-534: Information Exposure Through Debug Log Files
+- CWE-532 - Information Exposure Through Log Files
+- CWE-534 - Information Exposure Through Debug Log Files
 - CWE-311 - Missing Encryption of Sensitive Data
 - CWE-312 - Cleartext Storage of Sensitive Information
 - CWE-522 - Insufficiently Protected Credentials

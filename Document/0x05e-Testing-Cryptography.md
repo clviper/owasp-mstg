@@ -199,7 +199,7 @@ public static void main (String args[]) {
 
 #### Dynamic Analysis
 
-Once an attacker is knowing what type of weak pseudo-random number generator (PRNG) is used, it can be trivial to write proof-of-concept to generate the next random value based on previously observed ones, as it was [done for Java Random](http://franklinta.com/2014/08/31/predicting-the-next-math-random-in-java/ "Predicting the next Math.random() in Java"). In case of very weak custom random generators it may be possible to observe the pattern statistically. Although the recommended approach would anyway be to decompile the APK and inspect the algorithm (see Static Analysis).
+Once an attacker is knowing what type of weak pseudo-random number generator (PRNG) is used, it can be trivial to write proof-of-concept to generate the next random value based on previously observed ones, as it was [done for Java Random](https://franklinta.com/2014/08/31/predicting-the-next-math-random-in-java/ "Predicting the next Math.random() in Java"). In case of very weak custom random generators it may be possible to observe the pattern statistically. Although the recommended approach would anyway be to decompile the APK and inspect the algorithm (see Static Analysis).
 
 
 ### Testing Key Management
@@ -255,11 +255,11 @@ Locate uses of the cryptographic primitives in reverse engineered or disassemble
 - And a few others in the `java.security.*` and `javax.crypto.*` packages.
 
 As an example we illustrate how to locate the use of a hardcoded encryption key. First disassmble the DEX bytecode to a collection of Smali bytecode files using ```Baksmali```.
-```Bash
+```shell
 $ baksmali d file.apk -o smali_output/
 ```
 Now that we have a collection of Smali bytecode files, we can search the files for the usage of the ```SecretKeySpec``` class. We do this by simply recursively grepping on the Smali source code we just obtained. Please note that class descriptors in Smali start with `L` and end with `;`:
-```Bash
+```shell
 $ grep -r "Ljavax\crypto\spec\SecretKeySpec;"
 ```
 This will highlight all the classes that use the ```SecretKeySpec``` class, we now examine all the highlighted files and trace which bytes are used to pass the key material. The figure below shows the result of performing this assessment on a production ready application. For sake of readability we have reverse engineered the DEX bytecode to Java code. We can clearly locate the use of a static encryption key that is hardcoded and initialized in the static byte array ```Encrypt.keyBytes```.
@@ -286,6 +286,6 @@ Hook cryptographic methods and analyze the keys that are being used. Monitor fil
 
 ##### CWE
 
-- CWE-321: Use of Hard-coded Cryptographic Key
-- CWE-326: Inadequate Encryption Strength
-- CWE-330: Use of Insufficiently Random Values
+- CWE-321 - Use of Hard-coded Cryptographic Key
+- CWE-326 - Inadequate Encryption Strength
+- CWE-330 - Use of Insufficiently Random Values

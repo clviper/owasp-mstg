@@ -455,7 +455,7 @@ int xyz(char *dst) {
 
 ##### Пример реализации - хранилище
 
-Когда заходит речь и проверках целостности хранилища приложения, как такового, вы можете создать HMAC или же подпись, на основе данной пары ключ-значение или же на основе файла, храняшегося на устройстве. Когда вы создаете HMAC, лучше всего использовать реализации в CommonCrypto. В случае необходимости шифрования: пожалуйста, обедитесь, что вы шифруете, а затем применяете HMAC, как описано в [Authenticated Encryption](http://cseweb.ucsd.edu/~mihir/papers/oem.html "Authenticated Encryption: Relations among notions and analysis of the generic composition paradigm").
+Когда заходит речь и проверках целостности хранилища приложения, как такового, вы можете создать HMAC или же подпись, на основе данной пары ключ-значение или же на основе файла, храняшегося на устройстве. Когда вы создаете HMAC, лучше всего использовать реализации в CommonCrypto. В случае необходимости шифрования: пожалуйста, обедитесь, что вы шифруете, а затем применяете HMAC, как описано в [Authenticated Encryption](https://cseweb.ucsd.edu/~mihir/papers/oem.html "Authenticated Encryption: Relations among notions and analysis of the generic composition paradigm").
 
 Когда производите генерацию HMAC с CC:
 
@@ -466,7 +466,7 @@ int xyz(char *dst) {
 5. Сохраните результат шага номер 4.
 
 
-```obj-c
+```objc
 	// Allocate a buffer to hold the digest, and perform the digest.
 	NSMutableData* actualData = [getData];
  	//get the key from the keychain
@@ -485,7 +485,7 @@ int xyz(char *dst) {
 2. Повторите шаги 1-3 генерации hmac, используя `NSData`.
 3. Теперь сравните полученные hmacbytes с результатом шага 1.
 
-```obj-c
+```objc
 	NSData* hmac = [data subdataWithRange:NSMakeRange(data.length - CC_SHA256_DIGEST_LENGTH, CC_SHA256_DIGEST_LENGTH)];
 	NSData* actualData = [data subdataWithRange:NSMakeRange(0, (data.length - hmac.length))];
 	NSMutableData* digestBuffer = [NSMutableData dataWithLength:CC_SHA256_DIGEST_LENGTH];

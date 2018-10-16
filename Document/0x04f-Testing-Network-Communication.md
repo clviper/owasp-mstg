@@ -47,13 +47,13 @@ For a full dynamic analysis of a mobile app, all network traffic should be inter
 
 Ettercap is available for all major Linux and Unix operating systems and should be part of their respective package installation mechanisms. You need to install it on your machine that will act as the MITM. On macOS it can be installed by using brew.
 
-```bash
+```shell
 $ brew install ettercap
 ```
 
 Ettercap can also be installed through `apt-get` on Debian based linux distributions.
 
-```bash
+```shell
 sudo apt-get install zlib1g zlib1g-dev
 sudo apt-get install build-essential
 sudo apt-get install ettercap
@@ -64,7 +64,7 @@ sudo apt-get install ettercap
 Install a tool that allows you to monitor and analyze the network traffic that will be redirected to your machine. The two most common network monitoring (or capturing) tools are:
 
 - [Wireshark](https://www.wireshark.org "Wireshark") (CLI pendant: [tshark](https://www.wireshark.org/docs/man-pages/tshark.html "TShark")) and
-- [tcpdump](http://www.tcpdump.org/tcpdump_man.html "tcpdump")
+- [tcpdump](https://www.tcpdump.org/tcpdump_man.html "tcpdump")
 
 Wireshark offers a GUI and is more straightforward if you are not used to the command line. If you are looking for a command line tool you should either use TShark or tcpdump. All of these tools are available for all major Linux and Unix operating systems and should be part of their respective package installation mechanisms.
 
@@ -79,13 +79,13 @@ To be able to get a man-in-the-middle position your machine should be in the sam
 
 Start ettercap with the following command and replace the first IP addresses with the network gateway in the wireless network and the second one with the one of your mobile device.
 
-```bash
+```shell
 $ sudo ettercap -T -i en0 -M arp:remote /192.168.0.1// /192.168.0.105//
 ```
 
 On the mobile phone start the browser and navigate to example.com, you should see output like the following:
 
-```bash
+```shell
 ettercap 0.8.2 copyright 2001-2015 Ettercap Development Team
 
 Listening on:
@@ -163,7 +163,7 @@ WebRequest.DefaultWebProxy = new WebProxy("192.168.11.1", 8080);
 
 - Use ettercap in order to get a man-in-the-middle position (MITM), see the section above about how to setup a MITM attack. When being MITM we only need to redirect port 443 to our interception proxy running on localhost. This can be done by using the command `rdr` on macOS:
 
-```bash
+```shell
 $ echo "
 rdr pass inet proto tcp from any to any port 443 -> 127.0.0.1 port 8080
 " | sudo pfctl -ef -
@@ -245,15 +245,6 @@ Interception proxies like Burp and OWASP ZAP will show HTTP traffic only. You ca
 
 > Some applications may not work with proxies like Burp and ZAP because of Certificate Pinning. In such a scenario, please check "Testing Custom Certificate Stores and SSL Pinning". Tools like Vproxy can be used to redirect all HTTP(S) traffic to your machine to sniff and investigate it for unencrypted requests.
 
-- Capture all network traffic with Tcpdump. Consider this when Burp or OWASP ZAP do not recognize protocols (e.g. XMPP). You can begin live capturing via the command:
-
-```bash
-adb shell "tcpdump -s 0 -w - | nc -l -p 1234"
-adb forward tcp:1234 tcp:1234
-```
-
-You can display the captured traffic in a human-readable format with Wireshark. Figure out which protocols are used and whether they are unencrypted. Capturing all traffic (TCP and UDP) is important, so you should execute all functions of the tested application after you've intercepted it.
-
 
 ### Making Sure that Critical Operations Use Secure Communication Channels
 
@@ -295,7 +286,7 @@ Make sure that critical operations enforce the use of at least one additional ch
 
 #### Tools
 
-- Tcpdump - http://www.androidtcpdump.com/
+- Tcpdump - https://www.androidtcpdump.com/
 - Wireshark - https://www.wireshark.org/
 - OWASP ZAP - https://www.owasp.org/index.php/OWASP_Zed_Attack_Proxy_Project
 - Burp Suite - https://portswigger.net/burp/
